@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scam Shield Detector</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-check {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-check:hover {
+            background-color: #0056b3;
+        }
+        .btn-clear {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .btn-clear:hover {
+            background-color: #d4d4d4;
+        }
+        #result-card {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            display: none;
+        }
+        .scam {
+            background-color: #dc3545; /* Red */
+        }
+        .safe {
+            background-color: #28a745; /* Green */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Scam Shield Detector</h2>
+    <textarea id="messageInput" placeholder="Paste your message here..."></textarea>
+    
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkMessage()">Check Message</button>
+        <button class="btn-clear" onclick="clearInput()">Clear</button>
+    </div>
+
+    <div id="result-card"></div>
+</div>
+
+<script>
+    async function checkMessage() {
+        const messageText = document.getElementById("messageInput").value.trim();
+        const resultCard = document.getElementById("result-card");
+
+        if (!messageText) {
+            alert("Please enter a message to analyze.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: messageText })
+            });
+
+            const data = await response.json();
+            
+            resultCard.style.display = "block";
+            
+            if (data.is_scam) {
+                resultCard.className = "scam";
+                resultCard.innerText = "🚨 SCAM DETECTED";
+            } else {
+                resultCard.className = "safe";
+                resultCard.innerText = "✅ SAFE MESSAGE";
+            }
+        } catch (error) {
+            resultCard.style.display = "block";
+            resultCard.className = "scam";
+            resultCard.innerText = "Error connecting to backend server.";
+        }
+    }
+
+    function clearInput() {
+        document.getElementById("messageInput").value = "";
+        const resultCard = document.getElementById("result-card");
+        resultCard.style.display = "none";
+    }
+</script>
+
+</body>
+</html>
